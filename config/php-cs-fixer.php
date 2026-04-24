@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use PhpCsFixer\Config;
 use PhpCsFixer\Finder;
+use PhpCsFixer\Runner\Parallel\ParallelConfigFactory;
 
 // Lumen canonical PHP code style.
 //
@@ -23,6 +24,7 @@ return (new Config())
     ->setUsingCache(true)
     ->setLineEnding("\n")
     ->setIndent('    ')
+    ->setParallelConfig(ParallelConfigFactory::sequential())
     ->setRules([
         '@PSR12' => true,
         '@PHP82Migration' => true,
