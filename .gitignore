@@ -1,4 +1,5 @@
 /vendor/
+/build/
 /.lens/
 /.phpunit.cache/
 /.box_dump/

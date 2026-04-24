@@ -120,7 +120,7 @@ final readonly class ProjectConfig
     }
 
     /**
-     * @param array<string, mixed> $raw
+     * @param array<array-key, mixed> $raw
      *
      * @return list<string>|null
      */

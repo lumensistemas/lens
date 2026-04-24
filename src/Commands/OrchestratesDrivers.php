@@ -11,6 +11,7 @@ use LumenSistemas\Lens\Drivers\Mode;
 use LumenSistemas\Lens\Drivers\RunContext;
 use LumenSistemas\Lens\Output\Reporter;
 use LumenSistemas\Lens\Process\DirtyFiles;
+use RuntimeException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -45,7 +46,11 @@ abstract class OrchestratesDrivers extends Command
         $dirtyFiles = null;
 
         if ((bool) $input->getOption('dirty')) {
-            $base = (string) $input->getOption('base');
+            $base = $input->getOption('base');
+
+            if (! is_string($base)) {
+                throw new RuntimeException('lens: --base must be a string');
+            }
             $dirtyFiles = DirtyFiles::relativeTo($projectRoot, $base);
         }
 
@@ -56,7 +61,12 @@ abstract class OrchestratesDrivers extends Command
             dirtyFiles: $dirtyFiles,
         );
 
-        $selected = $this->select($drivers, (string) ($input->getOption('using') ?? ''));
+        $using = $input->getOption('using') ?? '';
+
+        if (! is_string($using)) {
+            throw new RuntimeException('lens: --using must be a string');
+        }
+        $selected = $this->select($drivers, $using);
         $reporter = new Reporter($output, $ci);
 
         foreach ($selected as $driver) {
@@ -87,7 +97,7 @@ abstract class OrchestratesDrivers extends Command
             return $drivers;
         }
 
-        $names = array_map('trim', explode(',', $using));
+        $names = array_map(trim(...), explode(',', $using));
         $byName = [];
 
         foreach ($drivers as $driver) {

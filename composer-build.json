@@ -1,0 +1,28 @@
+{
+    "name": "lumensistemas/lens-build",
+    "description": "Build manifest for the lens PHAR. Runtime tools live in `require` so Box bundles them; nothing dev-only is installed. Not published.",
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "php": "^8.2",
+        "ext-json": "*",
+        "friendsofphp/php-cs-fixer": "^3.64",
+        "larastan/larastan": "^3.0",
+        "phpstan/phpstan": "^2.1",
+        "rector/rector": "^2.0",
+        "symfony/console": "^6.4 || ^7.0",
+        "symfony/finder": "^6.4 || ^7.0",
+        "symfony/process": "^6.4 || ^7.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "LumenSistemas\\Lens\\": "src/"
+        }
+    },
+    "bin": ["bin/lens"],
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

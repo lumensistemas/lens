@@ -39,10 +39,7 @@
     },
     "scripts": {
         "lens": "@php bin/lens",
-        "build": [
-            "@php -r \"@mkdir('vendor/humbug/php-scoper/vendor-hotfix', 0755, true); file_put_contents('vendor/humbug/php-scoper/vendor-hotfix/_placeholder.php', '<?php // empty classmap dir placeholder for box autoload dump');\"",
-            "@php vendor/bin/box compile"
-        ]
+        "build": "@php bin/build.php"
     },
     "minimum-stability": "stable",
     "prefer-stable": true

@@ -5,7 +5,7 @@
 # baseline file declared in lens.json (phpstan.baseline).
 
 parameters:
-    level: 8
+    level: max
     paths: []
     tmpDir: %currentWorkingDirectory%/.lens/phpstan
     parallel:
