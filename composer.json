@@ -1,0 +1,49 @@
+{
+    "name": "lumensistemas/lens",
+    "description": "Lumen's PHP code-quality conventions, baked in. Wraps php-cs-fixer, Rector and PHPStan with shipped config.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": ["lint", "static-analysis", "php-cs-fixer", "rector", "phpstan", "laravel", "lumen"],
+    "homepage": "https://github.com/lumensistemas/lens",
+    "require": {
+        "php": "^8.2",
+        "ext-json": "*"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.64",
+        "humbug/box": "^4.7",
+        "larastan/larastan": "^3.0",
+        "phpstan/phpstan": "^2.1",
+        "phpunit/phpunit": "^10.5",
+        "rector/rector": "^2.0",
+        "symfony/console": "^6.4 || ^7.0",
+        "symfony/finder": "^6.4 || ^7.0",
+        "symfony/process": "^6.4 || ^7.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "LumenSistemas\\Lens\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "LumenSistemas\\Lens\\Tests\\": "tests/"
+        }
+    },
+    "bin": ["builds/lens"],
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "composer/package-versions-deprecated": true
+        }
+    },
+    "scripts": {
+        "lens": "@php bin/lens",
+        "build": [
+            "@php -r \"@mkdir('vendor/humbug/php-scoper/vendor-hotfix', 0755, true); file_put_contents('vendor/humbug/php-scoper/vendor-hotfix/_placeholder.php', '<?php // empty classmap dir placeholder for box autoload dump');\"",
+            "@php vendor/bin/box compile"
+        ]
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

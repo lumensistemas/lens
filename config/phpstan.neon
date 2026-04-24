@@ -1,0 +1,20 @@
+# Lumen canonical static analysis configuration.
+#
+# Editing this file changes the convention for every product on
+# `lumensistemas/lens`. Per-project overrides are limited to a
+# baseline file declared in lens.json (phpstan.baseline).
+
+parameters:
+    level: 8
+    paths: []
+    tmpDir: %currentWorkingDirectory%/.lens/phpstan
+    parallel:
+        maximumNumberOfProcesses: 4
+    treatPhpDocTypesAsCertain: false
+    reportUnmatchedIgnoredErrors: false
+    excludePaths:
+        analyseAndScan:
+            - */vendor/*
+            - */storage/*
+            - */bootstrap/cache/*
+            - */node_modules/*

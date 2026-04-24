@@ -1,0 +1,7 @@
+/vendor/
+/.lens/
+/.phpunit.cache/
+/.box_dump/
+/.claude/
+/builds/.gitkeep
+

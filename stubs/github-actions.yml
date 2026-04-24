@@ -1,0 +1,31 @@
+name: lens
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  lens:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            vendor
+            .lens
+          key: lens-${{ runner.os }}-${{ hashFiles('composer.lock') }}
+          restore-keys: lens-${{ runner.os }}-
+
+      - run: composer install --no-interaction --no-progress --prefer-dist
+
+      - run: vendor/bin/lens check --ci

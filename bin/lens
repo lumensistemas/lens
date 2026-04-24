@@ -1,0 +1,25 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+use LumenSistemas\Lens\Application;
+
+$autoloaders = [
+    __DIR__ . '/../vendor/autoload.php',
+    __DIR__ . '/../../../autoload.php',
+];
+
+foreach ($autoloaders as $autoloader) {
+    if (file_exists($autoloader)) {
+        require $autoloader;
+        break;
+    }
+}
+
+if (! class_exists(Application::class)) {
+    fwrite(STDERR, "lens: composer autoloader not found. Run `composer install`.\n");
+    exit(1);
+}
+
+exit((new Application())->run());
