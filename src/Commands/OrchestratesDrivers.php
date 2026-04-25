@@ -7,6 +7,7 @@ namespace LumenSistemas\Lens\Commands;
 use LumenSistemas\Lens\Application;
 use LumenSistemas\Lens\Config\ProjectConfig;
 use LumenSistemas\Lens\Drivers\Driver;
+use LumenSistemas\Lens\Drivers\DriverSelection;
 use LumenSistemas\Lens\Drivers\Mode;
 use LumenSistemas\Lens\Drivers\RunContext;
 use LumenSistemas\Lens\Output\Reporter;
@@ -66,7 +67,7 @@ abstract class OrchestratesDrivers extends Command
         if (! is_string($using)) {
             throw new RuntimeException('lens: --using must be a string');
         }
-        $selected = $this->select($drivers, $using);
+        $selected = DriverSelection::fromUsing($drivers, $using);
         $reporter = new Reporter($output, $ci);
 
         foreach ($selected as $driver) {
@@ -82,36 +83,5 @@ abstract class OrchestratesDrivers extends Command
         }
 
         return $reporter->summarize();
-    }
-
-    /**
-     * @param list<Driver> $drivers
-     *
-     * @return list<Driver>
-     */
-    private function select(array $drivers, string $using): array
-    {
-        $using = trim($using);
-
-        if ($using === '') {
-            return $drivers;
-        }
-
-        $names = array_map(trim(...), explode(',', $using));
-        $byName = [];
-
-        foreach ($drivers as $driver) {
-            $byName[$driver->name()] = $driver;
-        }
-
-        $selected = [];
-
-        foreach ($names as $name) {
-            if (isset($byName[$name])) {
-                $selected[] = $byName[$name];
-            }
-        }
-
-        return $selected;
     }
 }

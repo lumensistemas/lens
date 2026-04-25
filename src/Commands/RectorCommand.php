@@ -14,6 +14,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 #[AsCommand(name: 'rector', description: 'Run only Rector.')]
 final class RectorCommand extends OrchestratesDrivers
 {
+    #[\Override]
     protected function configure(): void
     {
         parent::configure();

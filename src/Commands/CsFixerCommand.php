@@ -14,6 +14,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 #[AsCommand(name: 'cs-fixer', description: 'Run only php-cs-fixer.')]
 final class CsFixerCommand extends OrchestratesDrivers
 {
+    #[\Override]
     protected function configure(): void
     {
         parent::configure();

@@ -27,7 +27,7 @@ return (new Config())
     ->setParallelConfig(ParallelConfigFactory::sequential())
     ->setRules([
         '@PSR12' => true,
-        '@PHP82Migration' => true,
+        '@PHP8x3Migration' => true,
         'array_syntax' => ['syntax' => 'short'],
         'binary_operator_spaces' => ['default' => 'single_space'],
         'blank_line_after_namespace' => true,
@@ -49,7 +49,10 @@ return (new Config())
             'keep_multiple_spaces_after_comma' => false,
         ],
         'no_extra_blank_lines' => [
-            'tokens' => ['extra', 'throw', 'use', 'use_trait'],
+            'tokens' => ['extra', 'throw', 'use'],
+        ],
+        'class_attributes_separation' => [
+            'elements' => ['trait_import' => 'none'],
         ],
         'no_superfluous_phpdoc_tags' => [
             'allow_mixed' => true,
@@ -91,7 +94,7 @@ return (new Config())
         'trailing_comma_in_multiline' => [
             'elements' => ['arrays', 'arguments', 'parameters', 'match'],
         ],
-        'visibility_required' => ['elements' => ['property', 'method', 'const']],
+        'modifier_keywords' => ['elements' => ['property', 'method', 'const']],
         'void_return' => true,
         'yoda_style' => false,
     ])

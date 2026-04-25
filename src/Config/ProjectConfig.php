@@ -9,9 +9,9 @@ use RuntimeException;
 
 final readonly class ProjectConfig
 {
-    private const ALLOWED_TOP_LEVEL = ['paths', 'exclude', 'phpstan'];
-    private const ALLOWED_PHPSTAN = ['baseline'];
-    private const DEFAULT_PATH_CANDIDATES = ['app', 'src', 'database', 'routes', 'tests'];
+    private const array ALLOWED_TOP_LEVEL = ['paths', 'exclude', 'phpstan'];
+    private const array ALLOWED_PHPSTAN = ['baseline'];
+    private const array DEFAULT_PATH_CANDIDATES = ['app', 'src', 'database', 'routes', 'tests'];
 
     /**
      * @param list<string> $paths
