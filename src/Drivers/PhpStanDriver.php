@@ -47,6 +47,17 @@ final readonly class PhpStanDriver implements Driver
             '--memory-limit=512M',
         ];
 
+        // Make the project's classes (Laravel itself in particular)
+        // visible to phpstan and to larastan's bootstrap. Without
+        // this, phpstan would only see lens's bundled vendor, where
+        // larastan lives but Illuminate\Foundation\Application does
+        // not — bootstrap blows up before any analysis runs.
+        $projectAutoload = $runContext->projectRoot.'/vendor/autoload.php';
+
+        if (file_exists($projectAutoload)) {
+            $command[] = '--autoload-file='.$projectAutoload;
+        }
+
         if ($runContext->ci) {
             $command[] = '--error-format=github';
         }

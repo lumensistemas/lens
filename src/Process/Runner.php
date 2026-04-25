@@ -7,7 +7,7 @@ namespace LumenSistemas\Lens\Process;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
 
-final class Runner
+class Runner
 {
     /**
      * @param list<string> $command
