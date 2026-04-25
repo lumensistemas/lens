@@ -32,14 +32,14 @@ describe('default detection', function (): void {
 
         $config = ProjectConfig::load($this->root);
 
-        expect($config->paths())->toBe(['app', 'routes']);
+        expect($config->paths)->toBe(['app', 'routes']);
         expect($config->phpstanBaseline($this->root))->toBeNull();
     });
 
     it('falls back to the project root when no candidate directory exists', function (): void {
         $config = ProjectConfig::load($this->root);
 
-        expect($config->paths())->toBe(['.']);
+        expect($config->paths)->toBe(['.']);
     });
 });
 
@@ -51,7 +51,7 @@ describe('lens.json parsing', function (): void {
 
         $config = ProjectConfig::load($this->root);
 
-        expect($config->paths())->toBe(['custom-src', 'tests']);
+        expect($config->paths)->toBe(['custom-src', 'tests']);
     });
 
     it('throws when lens.json is not valid JSON', function (): void {

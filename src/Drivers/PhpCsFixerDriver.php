@@ -30,9 +30,9 @@ final readonly class PhpCsFixerDriver implements Driver
     ): int {
         $runContext->ensureCacheDir();
 
-        $paths = $runContext->dirtyFiles ?? $projectConfig->paths();
+        $paths = $runContext->targets($projectConfig);
 
-        if ($runContext->dirtyFiles !== null && $paths === []) {
+        if ($paths === null) {
             return 0;
         }
 
@@ -54,49 +54,59 @@ final readonly class PhpCsFixerDriver implements Driver
             $arguments['--diff'] = true;
         }
 
-        // PHP-CS-Fixer reads PHP_CS_FIXER_IGNORE_ENV from real env,
-        // not from input — set it on the process before booting.
-        $previous = getenv('PHP_CS_FIXER_IGNORE_ENV');
-        putenv('PHP_CS_FIXER_IGNORE_ENV=1');
-
-        // Parallel mode in PHP-CS-Fixer spawns workers that re-invoke
-        // $_SERVER['SCRIPT_FILENAME']. When embedded inside lens this
-        // would point at the lens binary (or PHAR), which is not a
-        // cs-fixer worker entry point. Point it at cs-fixer's actual
-        // bin so spawned workers boot cs-fixer rather than lens.
         $bin = VendorPath::vendor().'/friendsofphp/php-cs-fixer/php-cs-fixer';
-        $savedScriptFilename = $_SERVER['SCRIPT_FILENAME'] ?? null;
-        $savedScriptName = $_SERVER['SCRIPT_NAME'] ?? null;
-        $savedArgv = is_array($_SERVER['argv'] ?? null) ? $_SERVER['argv'] : null;
-        $_SERVER['SCRIPT_FILENAME'] = $bin;
-        $_SERVER['SCRIPT_NAME'] = $bin;
-        $_SERVER['argv'] = [$bin, ...array_slice($savedArgv ?? [], 1)];
 
-        try {
+        return $this->withSpoofedEntrypoint($bin, function () use ($arguments, $output): int {
             $application = new PhpCsFixerApplication();
             $application->setAutoExit(false);
 
             return $application->run(new ArrayInput($arguments), $output);
+        });
+    }
+
+    /**
+     * Embedded in lens, $_SERVER['SCRIPT_FILENAME'] points at the
+     * lens binary, so PHP-CS-Fixer's parallel runner would re-spawn
+     * lens as a worker instead of itself. Spoof the script vars
+     * (and PHP_CS_FIXER_IGNORE_ENV) for the duration of the call,
+     * restoring on any exit path so the rest of lens sees its
+     * original environment.
+     *
+     * @template T
+     *
+     * @param callable(): T $fn
+     *
+     * @return T
+     */
+    private function withSpoofedEntrypoint(string $bin, callable $fn): mixed
+    {
+        $savedScriptFilename = $_SERVER['SCRIPT_FILENAME'] ?? null;
+        $savedScriptName = $_SERVER['SCRIPT_NAME'] ?? null;
+        $savedArgv = is_array($_SERVER['argv'] ?? null) ? $_SERVER['argv'] : null;
+        $savedEnv = getenv('PHP_CS_FIXER_IGNORE_ENV');
+
+        $_SERVER['SCRIPT_FILENAME'] = $bin;
+        $_SERVER['SCRIPT_NAME'] = $bin;
+        $_SERVER['argv'] = [$bin, ...array_slice($savedArgv ?? [], 1)];
+        putenv('PHP_CS_FIXER_IGNORE_ENV=1');
+
+        try {
+            return $fn();
         } finally {
-            if ($savedScriptFilename === null) {
-                unset($_SERVER['SCRIPT_FILENAME']);
-            } else {
-                $_SERVER['SCRIPT_FILENAME'] = $savedScriptFilename;
-            }
-
-            if ($savedScriptName === null) {
-                unset($_SERVER['SCRIPT_NAME']);
-            } else {
-                $_SERVER['SCRIPT_NAME'] = $savedScriptName;
-            }
-
-            if ($savedArgv === null) {
-                unset($_SERVER['argv']);
-            } else {
-                $_SERVER['argv'] = $savedArgv;
-            }
-
-            putenv('PHP_CS_FIXER_IGNORE_ENV'.($previous === false ? '' : '='.$previous));
+            $this->restoreServerVar('SCRIPT_FILENAME', $savedScriptFilename);
+            $this->restoreServerVar('SCRIPT_NAME', $savedScriptName);
+            $this->restoreServerVar('argv', $savedArgv);
+            putenv('PHP_CS_FIXER_IGNORE_ENV'.($savedEnv === false ? '' : '='.$savedEnv));
         }
+    }
+
+    private function restoreServerVar(string $key, mixed $previous): void
+    {
+        if ($previous === null) {
+            unset($_SERVER[$key]);
+
+            return;
+        }
+        $_SERVER[$key] = $previous;
     }
 }

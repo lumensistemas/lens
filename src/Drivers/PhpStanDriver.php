@@ -62,18 +62,14 @@ final readonly class PhpStanDriver implements Driver
             $command[] = '--error-format=github';
         }
 
-        if ($runContext->dirtyFiles !== null) {
-            if ($runContext->dirtyFiles === []) {
-                return 0;
-            }
+        $paths = $runContext->targets($projectConfig);
 
-            foreach ($runContext->dirtyFiles as $file) {
-                $command[] = $file;
-            }
-        } else {
-            foreach ($projectConfig->paths() as $path) {
-                $command[] = $path;
-            }
+        if ($paths === null) {
+            return 0;
+        }
+
+        foreach ($paths as $path) {
+            $command[] = $path;
         }
 
         return $this->runner->run($command, $runContext->projectRoot, $output);

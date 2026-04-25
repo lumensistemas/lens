@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace LumenSistemas\Lens\Drivers;
 
+use LumenSistemas\Lens\Config\ProjectConfig;
 use LumenSistemas\Lens\Process\Quietly;
 use RuntimeException;
 
@@ -22,6 +23,23 @@ final readonly class RunContext
     public function cacheDir(): string
     {
         return $this->projectRoot.'/.lens';
+    }
+
+    /**
+     * Files/dirs each driver should analyse: the dirty-files list
+     * when --dirty is set, otherwise the project config paths.
+     * Returns null when --dirty resolved to nothing — drivers should
+     * short-circuit and skip the tool entirely in that case.
+     *
+     * @return null|list<string>
+     */
+    public function targets(ProjectConfig $config): ?array
+    {
+        if ($this->dirtyFiles === []) {
+            return null;
+        }
+
+        return $this->dirtyFiles ?? $config->paths;
     }
 
     public function ensureCacheDir(): void

@@ -32,14 +32,12 @@ abstract class OrchestratesDrivers extends Command
 
     /**
      * @param list<Driver> $drivers
-     * @param array<string, Mode> $modeOverrides Per-driver mode (e.g., phpstan stays in check during fix).
      */
     protected function orchestrate(
         array $drivers,
         Mode $defaultMode,
         InputInterface $input,
         OutputInterface $output,
-        array $modeOverrides = [],
     ): int {
         $projectRoot = getcwd() ?: '.';
         $projectConfig = ProjectConfig::load($projectRoot);
@@ -87,11 +85,9 @@ abstract class OrchestratesDrivers extends Command
         $reporter = new Reporter($output, $ci);
 
         foreach ($selected as $driver) {
-            $mode = $modeOverrides[$driver->name()] ?? $defaultMode;
-
-            if ($mode === Mode::Fix && !$driver->supportsFix()) {
-                $mode = Mode::Check;
-            }
+            $mode = $defaultMode === Mode::Fix && !$driver->supportsFix()
+                ? Mode::Check
+                : $defaultMode;
 
             $reporter->startTool($driver->name());
             $exit = $driver->run($mode, $projectConfig, $runContext, $output);

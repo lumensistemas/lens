@@ -74,14 +74,6 @@ final readonly class ProjectConfig
         return new self(self::detectDefaultPaths($projectRoot), null);
     }
 
-    /**
-     * @return list<string>
-     */
-    public function paths(): array
-    {
-        return $this->paths;
-    }
-
     public function phpstanBaseline(string $projectRoot): ?string
     {
         if ($this->phpstanBaseline === null) {
