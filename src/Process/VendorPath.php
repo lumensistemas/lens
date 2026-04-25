@@ -20,7 +20,7 @@ final class VendorPath
 {
     public static function vendor(): string
     {
-        return self::root() . '/vendor';
+        return self::root().'/vendor';
     }
 
     public static function packageRoot(): string
@@ -41,26 +41,20 @@ final class VendorPath
     public static function assertSafeForRemoval(string $cache): void
     {
         if (is_link($cache)) {
-            throw new RuntimeException(
-                "lens: refusing to delete cache dir; {$cache} is a symlink",
-            );
+            throw new RuntimeException("lens: refusing to delete cache dir; {$cache} is a symlink");
         }
 
         $realCache = realpath($cache);
         $realRoot = realpath(self::cacheRoot());
 
         if ($realCache === false || $realRoot === false) {
-            throw new RuntimeException(
-                "lens: refusing to delete cache dir; cannot resolve canonical path of {$cache}",
-            );
+            throw new RuntimeException("lens: refusing to delete cache dir; cannot resolve canonical path of {$cache}");
         }
 
-        $expectedPrefix = $realRoot . '/lens/';
+        $expectedPrefix = $realRoot.'/lens/';
 
-        if (! str_starts_with($realCache . '/', $expectedPrefix)) {
-            throw new RuntimeException(
-                "lens: refusing to delete cache dir; {$cache} resolves outside the lens cache root ({$expectedPrefix})",
-            );
+        if (!str_starts_with($realCache.'/', $expectedPrefix)) {
+            throw new RuntimeException("lens: refusing to delete cache dir; {$cache} resolves outside the lens cache root ({$expectedPrefix})");
         }
     }
 
@@ -73,7 +67,7 @@ final class VendorPath
         }
 
         $cache = self::cacheDir();
-        $marker = $cache . '/.extracted';
+        $marker = $cache.'/.extracted';
         $signature = self::signature($running);
 
         if (file_exists($marker) && file_get_contents($marker) === $signature) {
@@ -90,12 +84,12 @@ final class VendorPath
 
         $created = Quietly::call(fn (): bool => mkdir($cache, 0o755, true));
 
-        if (! $created && ! is_dir($cache)) {
+        if (!$created && !is_dir($cache)) {
             throw new RuntimeException("lens: failed to create cache dir {$cache}");
         }
         (new Phar($running))->extractTo($cache, null, true);
 
-        $written = Quietly::call(fn (): int|false => file_put_contents($marker, $signature));
+        $written = Quietly::call(fn (): false|int => file_put_contents($marker, $signature));
 
         if ($written === false) {
             throw new RuntimeException("lens: failed to write extraction marker {$marker}");
@@ -108,18 +102,18 @@ final class VendorPath
     {
         $sig = (new Phar($pharPath))->getSignature();
 
-        return ($sig['hash_type'] ?? 'unknown') . ':' . ($sig['hash'] ?? '');
+        return ($sig['hash_type'] ?? 'unknown').':'.($sig['hash'] ?? '');
     }
 
     private static function cacheDir(): string
     {
-        return rtrim(self::cacheRoot(), '/') . '/lens/' . Application::VERSION;
+        return rtrim(self::cacheRoot(), '/').'/lens/'.Application::VERSION;
     }
 
     private static function cacheRoot(): string
     {
         return getenv('XDG_CACHE_HOME')
-            ?: ((getenv('HOME') ?: sys_get_temp_dir()) . '/.cache');
+            ?: ((getenv('HOME') ?: sys_get_temp_dir()).'/.cache');
     }
 
     private static function removeTree(string $path): void
@@ -132,20 +126,20 @@ final class VendorPath
             if ($entry === '..') {
                 continue;
             }
-            $full = $path . '/' . $entry;
+            $full = $path.'/'.$entry;
 
-            if (is_dir($full) && ! is_link($full)) {
+            if (is_dir($full) && !is_link($full)) {
                 self::removeTree($full);
 
                 continue;
             }
 
-            if (! Quietly::call(fn (): bool => unlink($full))) {
+            if (!Quietly::call(fn (): bool => unlink($full))) {
                 throw new RuntimeException("lens: failed to remove cached file {$full}");
             }
         }
 
-        if (! Quietly::call(fn (): bool => rmdir($path))) {
+        if (!Quietly::call(fn (): bool => rmdir($path))) {
             throw new RuntimeException("lens: failed to remove cache dir {$path}");
         }
     }

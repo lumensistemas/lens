@@ -14,13 +14,12 @@ final class Reporter
     public function __construct(
         private readonly OutputInterface $output,
         private readonly bool $ci = false,
-    ) {
-    }
+    ) {}
 
     public function startTool(string $name): void
     {
         if ($this->ci) {
-            $this->output->writeln('::group::' . $name);
+            $this->output->writeln('::group::'.$name);
 
             return;
         }

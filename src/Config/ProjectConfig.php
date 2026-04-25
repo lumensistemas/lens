@@ -11,7 +11,11 @@ final readonly class ProjectConfig
 {
     private const array ALLOWED_TOP_LEVEL = ['paths', 'phpstan'];
     private const array ALLOWED_PHPSTAN = ['baseline'];
-    private const array DEFAULT_PATH_CANDIDATES = ['app', 'src', 'database', 'routes', 'tests'];
+    private const array DEFAULT_PATH_CANDIDATES = [
+        'app', 'bootstrap', 'config',
+        'database', 'resources', 'routes',
+        'tests', 'src',
+    ];
 
     /**
      * @param list<string> $paths
@@ -19,14 +23,13 @@ final readonly class ProjectConfig
     private function __construct(
         public array $paths,
         private ?string $phpstanBaseline,
-    ) {
-    }
+    ) {}
 
     public static function load(string $projectRoot): self
     {
-        $configFile = $projectRoot . '/lens.json';
+        $configFile = $projectRoot.'/lens.json';
 
-        if (! file_exists($configFile)) {
+        if (!file_exists($configFile)) {
             return self::defaults($projectRoot);
         }
 
@@ -40,7 +43,7 @@ final readonly class ProjectConfig
             throw new RuntimeException("lens.json is not valid JSON: {$e->getMessage()}", $e->getCode(), $e);
         }
 
-        if (! is_array($raw)) {
+        if (!is_array($raw)) {
             throw new RuntimeException('lens.json must contain a JSON object.');
         }
 
@@ -50,13 +53,13 @@ final readonly class ProjectConfig
         $baseline = null;
 
         if (isset($raw['phpstan'])) {
-            if (! is_array($raw['phpstan'])) {
+            if (!is_array($raw['phpstan'])) {
                 throw new RuntimeException('lens.json: "phpstan" must be an object.');
             }
             self::reject(array_values(array_diff(array_keys($raw['phpstan']), self::ALLOWED_PHPSTAN)), 'lens.json#phpstan');
 
             if (isset($raw['phpstan']['baseline'])) {
-                if (! is_string($raw['phpstan']['baseline'])) {
+                if (!is_string($raw['phpstan']['baseline'])) {
                     throw new RuntimeException('lens.json: "phpstan.baseline" must be a string.');
                 }
                 $baseline = $raw['phpstan']['baseline'];
@@ -87,7 +90,7 @@ final readonly class ProjectConfig
 
         $absolute = str_starts_with($this->phpstanBaseline, '/')
             ? $this->phpstanBaseline
-            : $projectRoot . '/' . $this->phpstanBaseline;
+            : $projectRoot.'/'.$this->phpstanBaseline;
 
         return file_exists($absolute) ? $absolute : null;
     }
@@ -100,7 +103,7 @@ final readonly class ProjectConfig
         $detected = [];
 
         foreach (self::DEFAULT_PATH_CANDIDATES as $candidate) {
-            if (is_dir($projectRoot . '/' . $candidate)) {
+            if (is_dir($projectRoot.'/'.$candidate)) {
                 $detected[] = $candidate;
             }
         }
@@ -111,22 +114,22 @@ final readonly class ProjectConfig
     /**
      * @param array<array-key, mixed> $raw
      *
-     * @return list<string>|null
+     * @return null|list<string>
      */
     private static function stringList(array $raw, string $key): ?array
     {
-        if (! array_key_exists($key, $raw)) {
+        if (!array_key_exists($key, $raw)) {
             return null;
         }
 
-        if (! is_array($raw[$key])) {
+        if (!is_array($raw[$key])) {
             throw new RuntimeException("lens.json: \"{$key}\" must be an array of strings.");
         }
 
         $values = [];
 
         foreach ($raw[$key] as $value) {
-            if (! is_string($value)) {
+            if (!is_string($value)) {
                 throw new RuntimeException("lens.json: \"{$key}\" must be an array of strings.");
             }
             $values[] = $value;

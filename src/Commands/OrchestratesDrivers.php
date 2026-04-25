@@ -50,14 +50,14 @@ abstract class OrchestratesDrivers extends Command
         if ((bool) $input->getOption('dirty')) {
             $base = $input->getOption('base');
 
-            if (! is_string($base)) {
+            if (!is_string($base)) {
                 throw new RuntimeException('lens: --base must be a string');
             }
 
             try {
                 $dirtyFiles = DirtyFiles::relativeTo($projectRoot, $base);
             } catch (RuntimeException $e) {
-                $output->writeln('<error>' . $e->getMessage() . '</error>');
+                $output->writeln('<error>'.$e->getMessage().'</error>');
 
                 return Command::INVALID;
             }
@@ -72,14 +72,14 @@ abstract class OrchestratesDrivers extends Command
 
         $using = $input->getOption('using') ?? '';
 
-        if (! is_string($using)) {
+        if (!is_string($using)) {
             throw new RuntimeException('lens: --using must be a string');
         }
 
         try {
             $selected = DriverSelection::fromUsing($drivers, $using);
         } catch (InvalidArgumentException $e) {
-            $output->writeln('<error>' . $e->getMessage() . '</error>');
+            $output->writeln('<error>'.$e->getMessage().'</error>');
 
             return Command::INVALID;
         }
@@ -89,7 +89,7 @@ abstract class OrchestratesDrivers extends Command
         foreach ($selected as $driver) {
             $mode = $modeOverrides[$driver->name()] ?? $defaultMode;
 
-            if ($mode === Mode::Fix && ! $driver->supportsFix()) {
+            if ($mode === Mode::Fix && !$driver->supportsFix()) {
                 $mode = Mode::Check;
             }
 

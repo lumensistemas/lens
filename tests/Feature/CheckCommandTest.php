@@ -46,9 +46,13 @@ it('flags style violations and exits non-zero in cs-fixer-only check', function 
 });
 
 it('exits zero when the source is already clean', function (): void {
+    // Asks lens to lint a file that is pre-formatted to the shipped
+    // convention; if the convention changes, regenerate this fixture
+    // by running `vendor/bin/lens fix --using=php-cs-fixer` against
+    // a scratch copy and pasting the result.
     file_put_contents(
         $this->project . '/src/Clean.php',
-        "<?php\n\ndeclare(strict_types=1);\n\nnamespace Demo;\n\nfinal class Clean\n{\n    public function greet(string \$name): string\n    {\n        return 'hi ' . \$name;\n    }\n}\n",
+        "<?php\n\ndeclare(strict_types=1);\n\nnamespace Demo;\n\nfinal class Clean\n{\n    public function greet(string \$name): string\n    {\n        return 'hi '.\$name;\n    }\n}\n",
     );
 
     $exit = runLens(['check', '--using' => 'php-cs-fixer'], $output);

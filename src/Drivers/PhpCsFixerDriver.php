@@ -39,8 +39,8 @@ final readonly class PhpCsFixerDriver implements Driver
         $arguments = [
             'command' => 'fix',
             'path' => $paths,
-            '--config' => VendorPath::packageRoot() . '/config/php-cs-fixer.php',
-            '--cache-file' => $runContext->cacheDir() . '/cs-fixer.cache',
+            '--config' => VendorPath::packageRoot().'/config/php-cs-fixer.php',
+            '--cache-file' => $runContext->cacheDir().'/cs-fixer.cache',
             '--using-cache' => 'yes',
             '--show-progress' => 'none',
         ];
@@ -64,7 +64,7 @@ final readonly class PhpCsFixerDriver implements Driver
         // would point at the lens binary (or PHAR), which is not a
         // cs-fixer worker entry point. Point it at cs-fixer's actual
         // bin so spawned workers boot cs-fixer rather than lens.
-        $bin = VendorPath::vendor() . '/friendsofphp/php-cs-fixer/php-cs-fixer';
+        $bin = VendorPath::vendor().'/friendsofphp/php-cs-fixer/php-cs-fixer';
         $savedScriptFilename = $_SERVER['SCRIPT_FILENAME'] ?? null;
         $savedScriptName = $_SERVER['SCRIPT_NAME'] ?? null;
         $savedArgv = is_array($_SERVER['argv'] ?? null) ? $_SERVER['argv'] : null;
@@ -96,7 +96,7 @@ final readonly class PhpCsFixerDriver implements Driver
                 $_SERVER['argv'] = $savedArgv;
             }
 
-            putenv('PHP_CS_FIXER_IGNORE_ENV' . ($previous === false ? '' : '=' . $previous));
+            putenv('PHP_CS_FIXER_IGNORE_ENV'.($previous === false ? '' : '='.$previous));
         }
     }
 }

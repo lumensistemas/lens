@@ -11,9 +11,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 final readonly class RectorDriver implements Driver
 {
-    public function __construct(private Runner $runner = new Runner())
-    {
-    }
+    public function __construct(private Runner $runner = new Runner()) {}
 
     public function name(): string
     {
@@ -33,14 +31,14 @@ final readonly class RectorDriver implements Driver
     ): int {
         $runContext->ensureCacheDir();
 
-        $bin = VendorPath::vendor() . '/rector/rector/bin/rector';
-        $configPath = VendorPath::packageRoot() . '/config/rector.php';
+        $bin = VendorPath::vendor().'/rector/rector/bin/rector';
+        $configPath = VendorPath::packageRoot().'/config/rector.php';
 
         $command = [
             PHP_BINARY,
             $bin,
             'process',
-            '--config=' . $configPath,
+            '--config='.$configPath,
             '--no-progress-bar',
         ];
 
@@ -70,7 +68,7 @@ final readonly class RectorDriver implements Driver
             $command,
             $runContext->projectRoot,
             $output,
-            ['RECTOR_CACHE_DIRECTORY' => $runContext->cacheDir() . '/rector'],
+            ['RECTOR_CACHE_DIRECTORY' => $runContext->cacheDir().'/rector'],
         );
     }
 }

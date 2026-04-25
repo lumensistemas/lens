@@ -24,25 +24,25 @@ final class PublishWorkflowCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $projectRoot = getcwd() ?: '.';
-        $source = Application::packageRoot() . '/stubs/github-actions.yml';
-        $targetDir = $projectRoot . '/.github/workflows';
-        $target = $targetDir . '/lens.yml';
+        $source = Application::packageRoot().'/stubs/github-actions.yml';
+        $targetDir = $projectRoot.'/.github/workflows';
+        $target = $targetDir.'/lens.yml';
 
-        if (! is_dir($targetDir)) {
+        if (!is_dir($targetDir)) {
             $created = Quietly::call(fn (): bool => mkdir($targetDir, 0o755, true));
 
-            if (! $created && ! is_dir($targetDir)) {
+            if (!$created && !is_dir($targetDir)) {
                 throw new RuntimeException("lens publish:workflow: failed to create {$targetDir}");
             }
         }
 
-        if (file_exists($target) && ! $input->getOption('force')) {
+        if (file_exists($target) && !$input->getOption('force')) {
             $output->writeln('<comment>skip</comment> .github/workflows/lens.yml (already exists)');
 
             return Command::SUCCESS;
         }
 
-        if (! Quietly::call(fn (): bool => copy($source, $target))) {
+        if (!Quietly::call(fn (): bool => copy($source, $target))) {
             throw new RuntimeException("lens publish:workflow: failed to write {$target}");
         }
         $output->writeln('<info>wrote</info> .github/workflows/lens.yml');

@@ -26,7 +26,7 @@ return RectorConfig::configure()
         SetList::DEAD_CODE,
         SetList::TYPE_DECLARATION,
         SetList::EARLY_RETURN,
-        SetList::NAMING,
+        SetList::INSTANCEOF,
     ])
     ->withImportNames(
         importShortClasses: false,
@@ -45,8 +45,4 @@ return RectorConfig::configure()
         // idioms or our php-cs-fixer config. Add exclusions here
         // when a rule produces noise across products.
         InlineConstructorDefaultToPropertyRector::class,
-    ])
-    ->withRules([
-        RemoveUnusedPrivateMethodRector::class,
-        RemoveUnusedPrivatePropertyRector::class,
     ]);

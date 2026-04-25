@@ -24,24 +24,24 @@ final class InitCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $projectRoot = getcwd() ?: '.';
-        $stubsRoot = Application::packageRoot() . '/stubs';
+        $stubsRoot = Application::packageRoot().'/stubs';
         $force = (bool) $input->getOption('force');
 
         $files = [
-            'lens.json' => $stubsRoot . '/lens.json',
-            'phpstan-baseline.neon' => $stubsRoot . '/phpstan-baseline.neon',
+            'lens.json' => $stubsRoot.'/lens.json',
+            'phpstan-baseline.neon' => $stubsRoot.'/phpstan-baseline.neon',
         ];
 
         foreach ($files as $name => $source) {
-            $target = $projectRoot . '/' . $name;
+            $target = $projectRoot.'/'.$name;
 
-            if (file_exists($target) && ! $force) {
+            if (file_exists($target) && !$force) {
                 $output->writeln("<comment>skip</comment> {$name} (already exists)");
 
                 continue;
             }
 
-            if (! Quietly::call(fn (): bool => copy($source, $target))) {
+            if (!Quietly::call(fn (): bool => copy($source, $target))) {
                 throw new RuntimeException("lens init: failed to write {$target}");
             }
             $output->writeln("<info>wrote</info> {$name}");

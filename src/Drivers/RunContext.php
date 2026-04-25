@@ -10,19 +10,18 @@ use RuntimeException;
 final readonly class RunContext
 {
     /**
-     * @param list<string>|null $dirtyFiles Null when --dirty is not in use.
+     * @param null|list<string> $dirtyFiles null when --dirty is not in use
      */
     public function __construct(
         public string $projectRoot,
         public string $packageRoot,
         public bool $ci = false,
         public ?array $dirtyFiles = null,
-    ) {
-    }
+    ) {}
 
     public function cacheDir(): string
     {
-        return $this->projectRoot . '/.lens';
+        return $this->projectRoot.'/.lens';
     }
 
     public function ensureCacheDir(): void
@@ -38,7 +37,7 @@ final readonly class RunContext
         // returning false.
         $created = Quietly::call(fn (): bool => mkdir($dir, 0o755, true));
 
-        if (! $created && ! is_dir($dir)) {
+        if (!$created && !is_dir($dir)) {
             throw new RuntimeException("lens: failed to create cache dir {$dir}");
         }
     }

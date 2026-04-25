@@ -17,7 +17,7 @@ final class DriverSelection
      * @param list<Driver> $drivers
      *
      * @throws InvalidArgumentException when any requested name does
-     *                                  not match a known driver.
+     *                                  not match a known driver
      *
      * @return list<Driver>
      */
@@ -44,9 +44,7 @@ final class DriverSelection
             $known = implode(', ', array_keys($byName));
             $bad = implode(', ', $unknown);
 
-            throw new InvalidArgumentException(
-                "lens: unknown driver(s) in --using: {$bad}. Known: {$known}",
-            );
+            throw new InvalidArgumentException("lens: unknown driver(s) in --using: {$bad}. Known: {$known}");
         }
 
         return array_map(fn (string $name): Driver => $byName[$name], $names);

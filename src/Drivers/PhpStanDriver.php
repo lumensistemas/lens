@@ -13,9 +13,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 final readonly class PhpStanDriver implements Driver
 {
-    public function __construct(private Runner $runner = new Runner())
-    {
-    }
+    public function __construct(private Runner $runner = new Runner()) {}
 
     public function name(): string
     {
@@ -36,14 +34,14 @@ final readonly class PhpStanDriver implements Driver
         $runContext->ensureCacheDir();
 
         $vendor = VendorPath::vendor();
-        $bin = $vendor . '/phpstan/phpstan/phpstan';
+        $bin = $vendor.'/phpstan/phpstan/phpstan';
         $configPath = $this->writeMergedConfig($vendor, $projectConfig, $runContext);
 
         $command = [
             PHP_BINARY,
             $bin,
             'analyse',
-            '--configuration=' . $configPath,
+            '--configuration='.$configPath,
             '--no-interaction',
             '--no-progress',
             '--memory-limit=512M',
@@ -75,9 +73,9 @@ final readonly class PhpStanDriver implements Driver
         ProjectConfig $projectConfig,
         RunContext $runContext,
     ): string {
-        $shipped = VendorPath::packageRoot() . '/config/phpstan.neon';
+        $shipped = VendorPath::packageRoot().'/config/phpstan.neon';
         $larastan = $this->isLaravelProject($runContext->projectRoot)
-            ? $vendor . '/larastan/larastan/extension.neon'
+            ? $vendor.'/larastan/larastan/extension.neon'
             : null;
         $baseline = $projectConfig->phpstanBaseline($runContext->projectRoot);
 
@@ -94,11 +92,11 @@ final readonly class PhpStanDriver implements Driver
         $contents = "includes:\n";
 
         foreach ($includes as $include) {
-            $contents .= '    - ' . $include . "\n";
+            $contents .= '    - '.$include."\n";
         }
 
-        $merged = $runContext->cacheDir() . '/phpstan.neon';
-        $written = Quietly::call(fn (): int|false => file_put_contents($merged, $contents));
+        $merged = $runContext->cacheDir().'/phpstan.neon';
+        $written = Quietly::call(fn (): false|int => file_put_contents($merged, $contents));
 
         if ($written === false) {
             throw new RuntimeException("lens: failed to write merged phpstan config {$merged}");
@@ -109,15 +107,15 @@ final readonly class PhpStanDriver implements Driver
 
     private function isLaravelProject(string $projectRoot): bool
     {
-        $composerFile = $projectRoot . '/composer.json';
+        $composerFile = $projectRoot.'/composer.json';
 
-        if (! file_exists($composerFile)) {
+        if (!file_exists($composerFile)) {
             return false;
         }
 
         $data = json_decode((string) file_get_contents($composerFile), associative: true);
 
-        if (! is_array($data)) {
+        if (!is_array($data)) {
             return false;
         }
 
