@@ -14,6 +14,8 @@ shape.
 
 ## Install
 
+Requires PHP 8.3+ and `git` on PATH (for `--dirty`).
+
 ```sh
 composer require --dev lumensistemas/lens
 ```
@@ -22,16 +24,18 @@ The package installs a self-contained PHAR at `vendor/bin/lens`.
 None of the wrapped tools (php-cs-fixer, Rector, PHPStan,
 Larastan, symfony components) land in your project's `vendor/` —
 they are bundled inside the PHAR and extracted on first run to
-`~/.cache/lens/<version>/`. There are no version conflicts to
-resolve against your application's dependency tree.
+`~/.cache/lens/<version>/`. The cache is fingerprinted against the
+PHAR's signature, so swapping `builds/lens` for a newer build
+auto-invalidates without manual cleanup. There are no version
+conflicts to resolve against your application's dependency tree.
 
 ## Use
 
 ```sh
-vendor/bin/lens check     # run all linters in check mode
-vendor/bin/lens fix       # apply automatic fixes, then verify
-vendor/bin/lens cs-fixer  # single tool
-vendor/bin/lens rector
+vendor/bin/lens check            # run all linters in check mode
+vendor/bin/lens fix              # apply automatic fixes, then verify with phpstan
+vendor/bin/lens cs-fixer [--fix] # single tool, --fix toggles write mode
+vendor/bin/lens rector   [--fix]
 vendor/bin/lens phpstan
 ```
 
@@ -41,12 +45,18 @@ Useful flags:
 --dirty       only files changed vs. the merge-base with main
 --ci          GitHub-style annotations
 --using=…     comma-separated subset, e.g. --using=phpstan,rector
---base=<ref>  override the git base ref for --dirty (default origin/main)
+              (an unknown name fails fast — no silent skip)
+--base=<ref>  git base ref for --dirty (default origin/main)
 ```
 
 `lens check` returns the worst exit code across drivers, so a
 single non-zero result fails CI without you needing to chain
 commands.
+
+`--dirty` is strict: missing git, missing repo, or an unfetched
+base ref each fail loud. CI configurations using shallow clones
+should `git fetch origin <branch>` (or use
+`actions/checkout@v4` with `fetch-depth: 0`).
 
 ## One-time setup in a new project
 
@@ -55,9 +65,10 @@ vendor/bin/lens init                  # write lens.json + phpstan baseline
 vendor/bin/lens publish:workflow      # drop .github/workflows/lens.yml
 ```
 
-`init` is opt-in. lens runs without `lens.json` — it will detect
-common Laravel-style paths (`app`, `database`, `routes`, `tests`)
-and analyse those.
+`init` is opt-in. lens runs without `lens.json` — it auto-detects
+the standard Laravel layout (`app`, `bootstrap`, `config`,
+`database`, `resources`, `routes`, `tests`, `src`) and analyses
+whichever of those exist in the project root.
 
 ## lens.json — the override surface
 
@@ -111,8 +122,8 @@ work around it locally.
 git clone https://github.com/lumensistemas/lens
 cd lens
 composer install
-composer test         # pest, ~2s
-composer lens         # run lens against itself
+composer test         # pest, ~8s (4 subprocess-tagged tests)
+composer lens         # run lens check against itself
 composer run build    # rebuild builds/lens (the PHAR)
 ```
 
