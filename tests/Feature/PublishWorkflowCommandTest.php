@@ -65,3 +65,23 @@ it('skips an existing workflow unless --force is passed', function (): void {
     expect(file_get_contents($this->project . '/.github/workflows/lens.yml'))
         ->not->toBe('sentinel');
 });
+
+it('throws a clear error when .github cannot be created', function (): void {
+    if (posix_geteuid() === 0) {
+        $this->markTestSkipped('root user bypasses POSIX write permissions');
+    }
+    chmod($this->project, 0o555);
+
+    $application = new Application();
+    $application->setAutoExit(false);
+    $output = new BufferedOutput();
+
+    try {
+        $exit = $application->run(new ArrayInput(['command' => 'publish:workflow']), $output);
+
+        expect($exit)->toBeGreaterThan(0);
+        expect($output->fetch())->toContain('failed to create');
+    } finally {
+        chmod($this->project, 0o755);
+    }
+});

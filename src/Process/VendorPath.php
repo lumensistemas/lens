@@ -51,11 +51,18 @@ final class VendorPath
             self::removeTree($cache);
         }
 
-        if (! mkdir($cache, 0o755, true) && ! is_dir($cache)) {
-            throw new RuntimeException("lens: could not create cache dir {$cache}");
+        $created = Quietly::call(fn (): bool => mkdir($cache, 0o755, true));
+
+        if (! $created && ! is_dir($cache)) {
+            throw new RuntimeException("lens: failed to create cache dir {$cache}");
         }
         (new Phar($running))->extractTo($cache, null, true);
-        file_put_contents($marker, $signature);
+
+        $written = Quietly::call(fn (): int|false => file_put_contents($marker, $signature));
+
+        if ($written === false) {
+            throw new RuntimeException("lens: failed to write extraction marker {$marker}");
+        }
 
         return $cache;
     }
@@ -89,10 +96,17 @@ final class VendorPath
 
             if (is_dir($full) && ! is_link($full)) {
                 self::removeTree($full);
-            } else {
-                unlink($full);
+
+                continue;
+            }
+
+            if (! Quietly::call(fn (): bool => unlink($full))) {
+                throw new RuntimeException("lens: failed to remove cached file {$full}");
             }
         }
-        rmdir($path);
+
+        if (! Quietly::call(fn (): bool => rmdir($path))) {
+            throw new RuntimeException("lens: failed to remove cache dir {$path}");
+        }
     }
 }

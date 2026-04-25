@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace LumenSistemas\Lens\Commands;
 
 use LumenSistemas\Lens\Application;
+use LumenSistemas\Lens\Process\Quietly;
+use RuntimeException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -38,7 +40,10 @@ final class InitCommand extends Command
 
                 continue;
             }
-            copy($source, $target);
+
+            if (! Quietly::call(fn (): bool => copy($source, $target))) {
+                throw new RuntimeException("lens init: failed to write {$target}");
+            }
             $output->writeln("<info>wrote</info> {$name}");
         }
 

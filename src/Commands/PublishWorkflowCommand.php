@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace LumenSistemas\Lens\Commands;
 
 use LumenSistemas\Lens\Application;
+use LumenSistemas\Lens\Process\Quietly;
+use RuntimeException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -27,7 +29,11 @@ final class PublishWorkflowCommand extends Command
         $target = $targetDir . '/lens.yml';
 
         if (! is_dir($targetDir)) {
-            mkdir($targetDir, 0o755, true);
+            $created = Quietly::call(fn (): bool => mkdir($targetDir, 0o755, true));
+
+            if (! $created && ! is_dir($targetDir)) {
+                throw new RuntimeException("lens publish:workflow: failed to create {$targetDir}");
+            }
         }
 
         if (file_exists($target) && ! $input->getOption('force')) {
@@ -36,7 +42,9 @@ final class PublishWorkflowCommand extends Command
             return Command::SUCCESS;
         }
 
-        copy($source, $target);
+        if (! Quietly::call(fn (): bool => copy($source, $target))) {
+            throw new RuntimeException("lens publish:workflow: failed to write {$target}");
+        }
         $output->writeln('<info>wrote</info> .github/workflows/lens.yml');
 
         return Command::SUCCESS;

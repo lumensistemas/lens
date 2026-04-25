@@ -66,3 +66,24 @@ it('overwrites existing files when --force is passed', function (): void {
         ->not->toBe('{"paths":["custom"]}');
     expect($output->fetch())->toContain('wrote');
 });
+
+it('throws a clear error when the project root is not writable', function (): void {
+    if (posix_geteuid() === 0) {
+        $this->markTestSkipped('root user bypasses POSIX write permissions');
+    }
+    chmod($this->project, 0o555);
+
+    $application = new Application();
+    $application->setAutoExit(false);
+    $output = new BufferedOutput();
+
+    try {
+        $exit = $application->run(new ArrayInput(['command' => 'init']), $output);
+
+        expect($exit)->toBeGreaterThan(0);
+        expect($output->fetch())->toContain('failed to write');
+        expect(file_exists($this->project . '/lens.json'))->toBeFalse();
+    } finally {
+        chmod($this->project, 0o755);
+    }
+});

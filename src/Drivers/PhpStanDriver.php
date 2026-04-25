@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace LumenSistemas\Lens\Drivers;
 
 use LumenSistemas\Lens\Config\ProjectConfig;
+use LumenSistemas\Lens\Process\Quietly;
 use LumenSistemas\Lens\Process\Runner;
 use LumenSistemas\Lens\Process\VendorPath;
+use RuntimeException;
 use Symfony\Component\Console\Output\OutputInterface;
 
 final readonly class PhpStanDriver implements Driver
@@ -96,7 +98,11 @@ final readonly class PhpStanDriver implements Driver
         }
 
         $merged = $runContext->cacheDir() . '/phpstan.neon';
-        file_put_contents($merged, $contents);
+        $written = Quietly::call(fn (): int|false => file_put_contents($merged, $contents));
+
+        if ($written === false) {
+            throw new RuntimeException("lens: failed to write merged phpstan config {$merged}");
+        }
 
         return $merged;
     }

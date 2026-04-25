@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace LumenSistemas\Lens\Drivers;
 
+use LumenSistemas\Lens\Process\Quietly;
+use RuntimeException;
+
 final readonly class RunContext
 {
     /**
@@ -24,8 +27,19 @@ final readonly class RunContext
 
     public function ensureCacheDir(): void
     {
-        if (! is_dir($this->cacheDir())) {
-            mkdir($this->cacheDir(), 0o755, true);
+        $dir = $this->cacheDir();
+
+        if (is_dir($dir)) {
+            return;
+        }
+
+        // The is_dir() guard handles the race where a concurrent
+        // process created the directory between our check and mkdir
+        // returning false.
+        $created = Quietly::call(fn (): bool => mkdir($dir, 0o755, true));
+
+        if (! $created && ! is_dir($dir)) {
+            throw new RuntimeException("lens: failed to create cache dir {$dir}");
         }
     }
 }
