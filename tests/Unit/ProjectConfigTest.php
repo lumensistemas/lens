@@ -33,7 +33,6 @@ describe('default detection', function (): void {
         $config = ProjectConfig::load($this->root);
 
         expect($config->paths())->toBe(['app', 'routes']);
-        expect($config->exclude())->toBe([]);
         expect($config->phpstanBaseline($this->root))->toBeNull();
     });
 
@@ -45,16 +44,14 @@ describe('default detection', function (): void {
 });
 
 describe('lens.json parsing', function (): void {
-    it('reads paths and exclude from lens.json', function (): void {
+    it('reads paths from lens.json', function (): void {
         file_put_contents($this->root . '/lens.json', json_encode([
             'paths' => ['custom-src', 'tests'],
-            'exclude' => ['legacy'],
         ]));
 
         $config = ProjectConfig::load($this->root);
 
         expect($config->paths())->toBe(['custom-src', 'tests']);
-        expect($config->exclude())->toBe(['legacy']);
     });
 
     it('throws when lens.json is not valid JSON', function (): void {
@@ -77,6 +74,14 @@ describe('lens.json parsing', function (): void {
 
         ProjectConfig::load($this->root);
     })->throws(RuntimeException::class, 'unknown key(s): rules');
+
+    it('rejects exclude as an unknown top-level key', function (): void {
+        file_put_contents($this->root . '/lens.json', json_encode([
+            'exclude' => ['legacy'],
+        ]));
+
+        ProjectConfig::load($this->root);
+    })->throws(RuntimeException::class, 'unknown key(s): exclude');
 
     it('rejects unknown phpstan.* keys', function (): void {
         file_put_contents($this->root . '/lens.json', json_encode([

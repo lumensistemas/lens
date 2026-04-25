@@ -33,6 +33,14 @@ return RectorConfig::configure()
         removeUnusedImports: true,
     )
     ->withSkip([
+        // Universal path skips, mirrored from the shipped
+        // php-cs-fixer Finder and phpstan excludePaths so all three
+        // tools agree on what is "out of scope" by default.
+        '*/vendor/*',
+        '*/storage/*',
+        '*/bootstrap/cache/*',
+        '*/node_modules/*',
+
         // Rector ships several rules that conflict with Laravel
         // idioms or our php-cs-fixer config. Add exclusions here
         // when a rule produces noise across products.

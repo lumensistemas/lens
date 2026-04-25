@@ -1,6 +1,5 @@
 {
     "paths": ["app", "database", "routes", "tests"],
-    "exclude": ["bootstrap/cache", "storage"],
     "phpstan": {
         "baseline": "phpstan-baseline.neon"
     }

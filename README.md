@@ -68,7 +68,6 @@ product when lens is bumped.
 ```json
 {
     "paths": ["app", "database", "routes", "tests"],
-    "exclude": ["bootstrap/cache", "storage"],
     "phpstan": {
         "baseline": "phpstan-baseline.neon"
     }
@@ -78,8 +77,11 @@ product when lens is bumped.
 | key                | purpose                                                |
 | ------------------ | ------------------------------------------------------ |
 | `paths`            | dirs each tool analyses (default: detected)            |
-| `exclude`          | dirs to skip                                           |
 | `phpstan.baseline` | optional phpstan baseline file at the project root     |
+
+The shipped configs already exclude the universal cases (`vendor`,
+`storage`, `bootstrap/cache`, `node_modules`) globally — there is
+no per-project `exclude` knob today.
 
 Any other key is rejected with a clear error. If you find
 yourself wanting to disable a rule, the path is to open a PR

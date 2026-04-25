@@ -9,17 +9,15 @@ use RuntimeException;
 
 final readonly class ProjectConfig
 {
-    private const array ALLOWED_TOP_LEVEL = ['paths', 'exclude', 'phpstan'];
+    private const array ALLOWED_TOP_LEVEL = ['paths', 'phpstan'];
     private const array ALLOWED_PHPSTAN = ['baseline'];
     private const array DEFAULT_PATH_CANDIDATES = ['app', 'src', 'database', 'routes', 'tests'];
 
     /**
      * @param list<string> $paths
-     * @param list<string> $exclude
      */
     private function __construct(
         public array $paths,
-        public array $exclude,
         private ?string $phpstanBaseline,
     ) {
     }
@@ -49,7 +47,6 @@ final readonly class ProjectConfig
         self::reject(array_values(array_diff(array_keys($raw), self::ALLOWED_TOP_LEVEL)), 'lens.json');
 
         $paths = self::stringList($raw, 'paths') ?? self::detectDefaultPaths($projectRoot);
-        $exclude = self::stringList($raw, 'exclude') ?? [];
         $baseline = null;
 
         if (isset($raw['phpstan'])) {
@@ -66,12 +63,12 @@ final readonly class ProjectConfig
             }
         }
 
-        return new self($paths, $exclude, $baseline);
+        return new self($paths, $baseline);
     }
 
     public static function defaults(string $projectRoot): self
     {
-        return new self(self::detectDefaultPaths($projectRoot), [], null);
+        return new self(self::detectDefaultPaths($projectRoot), null);
     }
 
     /**
@@ -80,14 +77,6 @@ final readonly class ProjectConfig
     public function paths(): array
     {
         return $this->paths;
-    }
-
-    /**
-     * @return list<string>
-     */
-    public function exclude(): array
-    {
-        return $this->exclude;
     }
 
     public function phpstanBaseline(string $projectRoot): ?string
