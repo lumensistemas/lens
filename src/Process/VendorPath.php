@@ -38,16 +38,33 @@ final class VendorPath
 
         $cache = self::cacheDir();
         $marker = $cache . '/.extracted';
+        $signature = self::signature($running);
 
-        if (! file_exists($marker)) {
-            if (! is_dir($cache) && ! mkdir($cache, 0o755, true) && ! is_dir($cache)) {
-                throw new RuntimeException("lens: could not create cache dir {$cache}");
-            }
-            (new Phar($running))->extractTo($cache, null, true);
-            file_put_contents($marker, $running);
+        if (file_exists($marker) && file_get_contents($marker) === $signature) {
+            return $cache;
         }
 
+        // Stale cache (different PHAR build, or no marker yet). Wipe
+        // and re-extract — VERSION isn't bumped on every shipped-config
+        // change, so a content fingerprint is the only safe key.
+        if (is_dir($cache)) {
+            self::removeTree($cache);
+        }
+
+        if (! mkdir($cache, 0o755, true) && ! is_dir($cache)) {
+            throw new RuntimeException("lens: could not create cache dir {$cache}");
+        }
+        (new Phar($running))->extractTo($cache, null, true);
+        file_put_contents($marker, $signature);
+
         return $cache;
+    }
+
+    private static function signature(string $pharPath): string
+    {
+        $sig = (new Phar($pharPath))->getSignature();
+
+        return ($sig['hash_type'] ?? 'unknown') . ':' . ($sig['hash'] ?? '');
     }
 
     private static function cacheDir(): string
@@ -56,5 +73,25 @@ final class VendorPath
             ?: ((getenv('HOME') ?: sys_get_temp_dir()) . '/.cache');
 
         return rtrim($base, '/') . '/lens/' . Application::VERSION;
+    }
+
+    private static function removeTree(string $path): void
+    {
+        foreach (scandir($path) ?: [] as $entry) {
+            if ($entry === '.') {
+                continue;
+            }
+            if ($entry === '..') {
+                continue;
+            }
+            $full = $path . '/' . $entry;
+
+            if (is_dir($full) && ! is_link($full)) {
+                self::removeTree($full);
+            } else {
+                unlink($full);
+            }
+        }
+        rmdir($path);
     }
 }
