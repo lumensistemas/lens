@@ -15,7 +15,7 @@ use Symfony\Component\Console\Application as ConsoleApplication;
 
 final class Application extends ConsoleApplication
 {
-    public const string VERSION = '1.0.1';
+    public const string VERSION = '1.0.2';
 
     public function __construct()
     {
