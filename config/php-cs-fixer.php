@@ -2,12 +2,9 @@
 
 declare(strict_types=1);
 
-use Fidry\CpuCoreCounter\CpuCoreCounter;
-use Fidry\CpuCoreCounter\Finder\DummyCpuCoreFinder;
-use Fidry\CpuCoreCounter\Finder\FinderRegistry;
 use PhpCsFixer\Config;
 use PhpCsFixer\Finder;
-use PhpCsFixer\Runner\Parallel\ParallelConfig;
+use PhpCsFixer\Runner\Parallel\ParallelConfigFactory;
 
 // Lumen canonical PHP code style.
 //
@@ -22,21 +19,12 @@ $finder = Finder::create()
     ->exclude(['vendor', 'storage', 'bootstrap/cache', 'node_modules'])
     ->in(getcwd() ?: __DIR__);
 
-// Detect every available CPU. PHP-CS-Fixer's stock detect() reserves
-// one core for the orchestrator, which makes a 2-core machine fall
-// back to "1 core sequentially". For lint workloads the orchestrator
-// has no meaningful CPU footprint, so we use the full count.
-$cpuCount = (new CpuCoreCounter([
-    ...FinderRegistry::getDefaultLogicalFinders(),
-    new DummyCpuCoreFinder(1),
-]))->getCount();
-
 return (new Config())
     ->setRiskyAllowed(true)
     ->setUsingCache(true)
     ->setLineEnding("\n")
     ->setIndent('    ')
-    ->setParallelConfig(new ParallelConfig(max(1, $cpuCount)))
+    ->setParallelConfig(ParallelConfigFactory::detect())
     ->setRules([
         '@PSR12' => true,
         '@PHP8x3Migration' => true,
