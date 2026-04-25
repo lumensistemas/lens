@@ -6,6 +6,7 @@ namespace LumenSistemas\Lens\Commands;
 
 use LumenSistemas\Lens\Drivers\Mode;
 use LumenSistemas\Lens\Drivers\RectorDriver;
+use Override;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -14,7 +15,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 #[AsCommand(name: 'rector', description: 'Run only Rector.')]
 final class RectorCommand extends OrchestratesDrivers
 {
-    #[\Override]
+    #[Override]
     protected function configure(): void
     {
         parent::configure();

@@ -71,6 +71,22 @@ it('honors --using to skip drivers entirely', function (): void {
     expect($output)->not->toContain('phpstan');
 });
 
+it('runs all three drivers on a default check and reports each section', function (): void {
+    file_put_contents(
+        $this->project . '/src/Demo.php',
+        "<?php\nnamespace Demo;\nclass Hello{public function greet(\$n){return \"hi \".\$n;}}\n",
+    );
+
+    $exit = runLens(['check'], $output);
+
+    expect($exit)->toBeGreaterThan(0);
+    expect($output)
+        ->toContain('php-cs-fixer')
+        ->toContain('rector')
+        ->toContain('phpstan')
+        ->toContain('lens summary');
+})->group('slow');
+
 function runLens(array $args, ?string &$output): int
 {
     $application = new Application();
