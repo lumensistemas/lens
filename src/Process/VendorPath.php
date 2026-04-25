@@ -28,6 +28,42 @@ final class VendorPath
         return self::root();
     }
 
+    /**
+     * Refuse to recursively delete a cache path that is itself a
+     * symlink, or whose canonical resolution lies outside the
+     * expected lens cache root. Without this guard, an attacker (or
+     * a misconfigured environment) could redirect the cache path at
+     * an arbitrary directory and have removeTree wipe its contents.
+     *
+     * Public so the safety contract is testable in isolation; the
+     * actual scrub still happens inside root().
+     */
+    public static function assertSafeForRemoval(string $cache): void
+    {
+        if (is_link($cache)) {
+            throw new RuntimeException(
+                "lens: refusing to delete cache dir; {$cache} is a symlink",
+            );
+        }
+
+        $realCache = realpath($cache);
+        $realRoot = realpath(self::cacheRoot());
+
+        if ($realCache === false || $realRoot === false) {
+            throw new RuntimeException(
+                "lens: refusing to delete cache dir; cannot resolve canonical path of {$cache}",
+            );
+        }
+
+        $expectedPrefix = $realRoot . '/lens/';
+
+        if (! str_starts_with($realCache . '/', $expectedPrefix)) {
+            throw new RuntimeException(
+                "lens: refusing to delete cache dir; {$cache} resolves outside the lens cache root ({$expectedPrefix})",
+            );
+        }
+    }
+
     private static function root(): string
     {
         $running = Phar::running(false);
@@ -47,7 +83,8 @@ final class VendorPath
         // Stale cache (different PHAR build, or no marker yet). Wipe
         // and re-extract — VERSION isn't bumped on every shipped-config
         // change, so a content fingerprint is the only safe key.
-        if (is_dir($cache)) {
+        if (is_dir($cache) || is_link($cache)) {
+            self::assertSafeForRemoval($cache);
             self::removeTree($cache);
         }
 
@@ -76,10 +113,13 @@ final class VendorPath
 
     private static function cacheDir(): string
     {
-        $base = getenv('XDG_CACHE_HOME')
-            ?: ((getenv('HOME') ?: sys_get_temp_dir()) . '/.cache');
+        return rtrim(self::cacheRoot(), '/') . '/lens/' . Application::VERSION;
+    }
 
-        return rtrim($base, '/') . '/lens/' . Application::VERSION;
+    private static function cacheRoot(): string
+    {
+        return getenv('XDG_CACHE_HOME')
+            ?: ((getenv('HOME') ?: sys_get_temp_dir()) . '/.cache');
     }
 
     private static function removeTree(string $path): void
