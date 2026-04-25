@@ -24,7 +24,7 @@ return (new Config())
     ->setUsingCache(true)
     ->setLineEnding("\n")
     ->setIndent('    ')
-    ->setParallelConfig(ParallelConfigFactory::sequential())
+    ->setParallelConfig(ParallelConfigFactory::detect())
     ->setRules([
         '@PSR12' => true,
         '@PHP8x3Migration' => true,
