@@ -71,6 +71,38 @@ it('honors --using to skip drivers entirely', function (): void {
     expect($output)->not->toContain('phpstan');
 });
 
+it('runs only rector when --using=rector is set', function (): void {
+    file_put_contents(
+        $this->project . '/src/Old.php',
+        "<?php\n\ndeclare(strict_types=1);\n\nnamespace Demo;\n\nfinal class Old\n{\n    public function call(): array\n    {\n        return array_map(function (\$x) { return \$x * 2; }, [1, 2]);\n    }\n}\n",
+    );
+
+    $exit = runLens(['check', '--using' => 'rector'], $output);
+
+    expect($output)
+        ->toContain('rector')
+        ->toContain('lens summary');
+    expect($output)->not->toContain('php-cs-fixer');
+    expect($output)->not->toContain('phpstan');
+    expect($exit)->toBeGreaterThanOrEqual(0);
+})->group('slow');
+
+it('runs only phpstan when --using=phpstan is set', function (): void {
+    file_put_contents(
+        $this->project . '/src/Untyped.php',
+        "<?php\n\ndeclare(strict_types=1);\n\nnamespace Demo;\n\nfinal class Untyped\n{\n    public function add(\$a, \$b)\n    {\n        return \$a + \$b;\n    }\n}\n",
+    );
+
+    $exit = runLens(['check', '--using' => 'phpstan'], $output);
+
+    expect($exit)->toBeGreaterThan(0);
+    expect($output)
+        ->toContain('phpstan')
+        ->toContain('lens summary');
+    expect($output)->not->toContain('php-cs-fixer');
+    expect($output)->not->toContain('rector');
+})->group('slow');
+
 it('runs all three drivers on a default check and reports each section', function (): void {
     file_put_contents(
         $this->project . '/src/Demo.php',

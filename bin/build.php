@@ -25,7 +25,9 @@ run('mkdir', '-p', $build);
 
 // Box does not follow symlinks, so the build tree is a real copy.
 run('cp', '-a', $root . '/composer-build.json', $build . '/composer.json');
-run('cp', '-a', $root . '/LICENSE', $build . '/LICENSE');
+foreach (['LICENSE', 'README.md'] as $file) {
+    run('cp', '-a', $root . '/' . $file, $build . '/' . $file);
+}
 foreach (['src', 'config', 'stubs', 'bin'] as $dir) {
     run('cp', '-a', $root . '/' . $dir, $build . '/' . $dir);
 }
@@ -34,7 +36,7 @@ file_put_contents($buildBox, json_encode([
     'main' => 'bin/lens',
     'output' => $root . '/builds/lens',
     'directories' => ['src', 'config', 'stubs'],
-    'files' => ['LICENSE'],
+    'files' => ['LICENSE', 'README.md'],
     'compactors' => ['KevinGH\\Box\\Compactor\\Php'],
     'compression' => 'GZ',
     'banner' => 'lumensistemas/lens — opinionated PHP code-quality conventions for Lumen.',
