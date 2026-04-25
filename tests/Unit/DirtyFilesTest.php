@@ -25,7 +25,7 @@ it('returns no files in a clean working tree', function (): void {
     git($this->repo, 'add', '.');
     git($this->repo, 'commit', '-m', 'initial', '--quiet');
 
-    expect(DirtyFiles::relativeTo($this->repo))->toBe([]);
+    expect(DirtyFiles::relativeTo($this->repo, 'main'))->toBe([]);
 });
 
 it('lists unstaged php files modified since the last commit', function (): void {
@@ -36,7 +36,7 @@ it('lists unstaged php files modified since the last commit', function (): void 
 
     file_put_contents($this->repo . '/Foo.php', "<?php\nclass Foo {} // edit\n");
 
-    expect(DirtyFiles::relativeTo($this->repo))->toBe(['Foo.php']);
+    expect(DirtyFiles::relativeTo($this->repo, 'main'))->toBe(['Foo.php']);
 });
 
 it('lists staged-but-not-committed files', function (): void {
@@ -47,7 +47,7 @@ it('lists staged-but-not-committed files', function (): void {
     file_put_contents($this->repo . '/Bar.php', "<?php\nclass Bar {}\n");
     git($this->repo, 'add', 'Bar.php');
 
-    expect(DirtyFiles::relativeTo($this->repo))->toContain('Bar.php');
+    expect(DirtyFiles::relativeTo($this->repo, 'main'))->toContain('Bar.php');
 });
 
 it('filters out non-php changes', function (): void {
@@ -59,7 +59,7 @@ it('filters out non-php changes', function (): void {
     file_put_contents($this->repo . '/Foo.php', "<?php\nclass Foo {} // edit\n");
     file_put_contents($this->repo . '/README.md', "edit\n");
 
-    expect(DirtyFiles::relativeTo($this->repo))->toBe(['Foo.php']);
+    expect(DirtyFiles::relativeTo($this->repo, 'main'))->toBe(['Foo.php']);
 });
 
 it('lists files added on a branch when comparing against the base ref', function (): void {
@@ -84,10 +84,40 @@ it('deduplicates files reported by both staged and unstaged diffs', function ():
     git($this->repo, 'add', 'Foo.php');
     file_put_contents($this->repo . '/Foo.php', "<?php\nclass Foo {} // unstaged\n");
 
-    $files = DirtyFiles::relativeTo($this->repo);
+    $files = DirtyFiles::relativeTo($this->repo, 'main');
 
     expect($files)->toBe(['Foo.php']);
 });
+
+it('throws when called outside a git repository', function (): void {
+    $notRepo = sys_get_temp_dir() . '/lens-not-a-repo-' . uniqid();
+    mkdir($notRepo, 0o755, true);
+
+    try {
+        DirtyFiles::relativeTo($notRepo, 'main');
+    } finally {
+        rmdir($notRepo);
+    }
+})->throws(RuntimeException::class, 'must be run inside a git repository');
+
+it('throws when the base ref does not exist', function (): void {
+    file_put_contents($this->repo . '/Foo.php', "<?php\nclass Foo {}\n");
+    git($this->repo, 'add', '.');
+    git($this->repo, 'commit', '-m', 'initial', '--quiet');
+
+    DirtyFiles::relativeTo($this->repo, 'origin/main');
+})->throws(RuntimeException::class, "base ref 'origin/main' not found");
+
+it('throws when the default base ref is not fetched (typical shallow-clone trap)', function (): void {
+    // Shallow-clone CI configurations frequently lack origin/main.
+    // Previously this silently fell through, returned [], and CI
+    // reported success without linting anything.
+    file_put_contents($this->repo . '/Foo.php', "<?php\nclass Foo {}\n");
+    git($this->repo, 'add', '.');
+    git($this->repo, 'commit', '-m', 'initial', '--quiet');
+
+    DirtyFiles::relativeTo($this->repo);
+})->throws(RuntimeException::class, "base ref 'origin/main' not found");
 
 function git(string $cwd, string ...$args): void
 {

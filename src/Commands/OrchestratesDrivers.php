@@ -53,7 +53,14 @@ abstract class OrchestratesDrivers extends Command
             if (! is_string($base)) {
                 throw new RuntimeException('lens: --base must be a string');
             }
-            $dirtyFiles = DirtyFiles::relativeTo($projectRoot, $base);
+
+            try {
+                $dirtyFiles = DirtyFiles::relativeTo($projectRoot, $base);
+            } catch (RuntimeException $e) {
+                $output->writeln('<error>' . $e->getMessage() . '</error>');
+
+                return Command::INVALID;
+            }
         }
 
         $runContext = new RunContext(

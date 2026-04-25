@@ -71,6 +71,19 @@ it('fails fast when --using contains an unknown driver name', function (): void 
     expect($output)->not->toContain('lens summary');
 });
 
+it('fails fast when --dirty is used outside a git repository', function (): void {
+    file_put_contents(
+        $this->project . '/src/Demo.php',
+        "<?php\n\ndeclare(strict_types=1);\n\nnamespace Demo;\n\nfinal class Demo {}\n",
+    );
+
+    $exit = runLens(['check', '--dirty' => true, '--using' => 'php-cs-fixer'], $output);
+
+    expect($exit)->toBeGreaterThan(0);
+    expect($output)->toContain('must be run inside a git repository');
+    expect($output)->not->toContain('lens summary');
+});
+
 it('fails fast when --using has a typo mixed with valid drivers', function (): void {
     file_put_contents(
         $this->project . '/src/Demo.php',
