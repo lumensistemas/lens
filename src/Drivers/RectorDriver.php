@@ -34,6 +34,9 @@ final readonly class RectorDriver implements Driver
         $bin = VendorPath::vendor().'/rector/rector/bin/rector';
         $configPath = VendorPath::packageRoot().'/config/rector.php';
 
+        // Rector's `process` subcommand rejects --no-interaction
+        // ("does not exist") and runs non-interactively by default,
+        // so suppress only the progress bar to keep CI logs clean.
         $command = [
             PHP_BINARY,
             $bin,

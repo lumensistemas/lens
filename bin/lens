@@ -5,6 +5,11 @@ declare(strict_types=1);
 
 use LumenSistemas\Lens\Application;
 
+// First path covers source-mode (composer install in the repo)
+// and the bundled vendor inside the PHAR. Second path covers
+// `composer global require` layouts where lens lives at
+// vendor/lumensistemas/lens/bin/lens and the global vendor is
+// three directories up.
 $autoloaders = [
     __DIR__ . '/../vendor/autoload.php',
     __DIR__ . '/../../../autoload.php',

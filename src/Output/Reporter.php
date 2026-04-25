@@ -18,6 +18,9 @@ final class Reporter
 
     public function startTool(string $name): void
     {
+        // ::group:: / ::endgroup:: are GitHub Actions workflow
+        // commands that render each tool's output as a collapsible
+        // section in the run log. Plain text otherwise.
         if ($this->ci) {
             $this->output->writeln('::group::'.$name);
 

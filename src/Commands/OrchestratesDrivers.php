@@ -85,6 +85,9 @@ abstract class OrchestratesDrivers extends Command
         $reporter = new Reporter($output, $ci);
 
         foreach ($selected as $driver) {
+            // `lens fix` should still run phpstan (which can't fix
+            // anything) as a verification step. Silently downgrade
+            // the mode for non-fix drivers instead of skipping them.
             $mode = $defaultMode === Mode::Fix && !$driver->supportsFix()
                 ? Mode::Check
                 : $defaultMode;

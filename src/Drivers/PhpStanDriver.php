@@ -75,6 +75,13 @@ final readonly class PhpStanDriver implements Driver
         return $this->runner->run($command, $runContext->projectRoot, $output);
     }
 
+    /**
+     * PHPStan's --configuration takes a single neon file. We need
+     * to combine the shipped rules, the larastan extension (when
+     * the project is Laravel), and the optional project baseline
+     * — so we generate a tiny wrapper neon at runtime that
+     * `includes:` all three.
+     */
     private function writeMergedConfig(
         string $vendor,
         ProjectConfig $projectConfig,
@@ -112,6 +119,13 @@ final readonly class PhpStanDriver implements Driver
         return $merged;
     }
 
+    /**
+     * We key on `laravel/framework` in the project's `require` (not
+     * the lockfile) because larastan's bootstrap pulls in a real
+     * Laravel application instance. Transitive dependencies on
+     * illuminate/* (or larastan being present in dev) don't imply
+     * a bootable Laravel app and would make larastan fail mid-run.
+     */
     private function isLaravelProject(string $projectRoot): bool
     {
         $composerFile = $projectRoot.'/composer.json';

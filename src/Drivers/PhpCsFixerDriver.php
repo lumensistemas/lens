@@ -36,6 +36,10 @@ final readonly class PhpCsFixerDriver implements Driver
             return 0;
         }
 
+        // Pin --cache-file inside .lens/ so cs-fixer doesn't drop a
+        // .php-cs-fixer.cache at the project root. --show-progress=
+        // none keeps the in-process invocation from interleaving its
+        // tty progress output with lens's reporter.
         $arguments = [
             'command' => 'fix',
             'path' => $paths,

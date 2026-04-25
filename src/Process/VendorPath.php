@@ -128,6 +128,11 @@ final class VendorPath
             }
             $full = $path.'/'.$entry;
 
+            // is_link() check guards against following a symlinked
+            // directory into something we never bundled. Treating
+            // those as files (unlink only the link, not its target)
+            // is what keeps stray symlinks inside the cache from
+            // turning into a wider rm -rf.
             if (is_dir($full) && !is_link($full)) {
                 self::removeTree($full);
 
