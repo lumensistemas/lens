@@ -1,0 +1,18 @@
+* text=auto eol=lf
+
+# Consumers install lens via the bundled PHAR at builds/lens.
+# Source files, configs, stubs, tests and dev tooling are all
+# bundled inside that PHAR and are not needed in the consumer's
+# vendor/ tree — keep the published archive minimal.
+/.gitattributes        export-ignore
+/.github               export-ignore
+/.gitignore            export-ignore
+/bin                   export-ignore
+/composer-build.json   export-ignore
+/composer.lock         export-ignore
+/config                export-ignore
+/lens.json             export-ignore
+/phpunit.xml           export-ignore
+/src                   export-ignore
+/stubs                 export-ignore
+/tests                 export-ignore
