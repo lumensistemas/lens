@@ -6,15 +6,15 @@
     "keywords": ["lint", "static-analysis", "php-cs-fixer", "rector", "phpstan", "laravel", "lumen"],
     "homepage": "https://github.com/lumensistemas/lens",
     "require": {
-        "php": "^8.2",
+        "php": "^8.3",
         "ext-json": "*"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.64",
         "humbug/box": "^4.7",
         "larastan/larastan": "^3.0",
+        "pestphp/pest": "^4.0",
         "phpstan/phpstan": "^2.1",
-        "phpunit/phpunit": "^10.5",
         "rector/rector": "^2.0",
         "symfony/console": "^6.4 || ^7.0",
         "symfony/finder": "^6.4 || ^7.0",
@@ -34,12 +34,14 @@
     "config": {
         "sort-packages": true,
         "allow-plugins": {
-            "composer/package-versions-deprecated": true
+            "composer/package-versions-deprecated": true,
+            "pestphp/pest-plugin": true
         }
     },
     "scripts": {
         "lens": "@php bin/lens",
-        "build": "@php bin/build.php"
+        "build": "@php bin/build.php",
+        "test": "@php vendor/bin/pest"
     },
     "minimum-stability": "stable",
     "prefer-stable": true
