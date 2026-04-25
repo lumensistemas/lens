@@ -1,5 +1,9 @@
 # lens
 
+[![Build](https://github.com/lumensistemas/lens/actions/workflows/lens.yml/badge.svg?branch=main)](https://github.com/lumensistemas/lens/actions/workflows/lens.yml)
+[![Packagist Version](https://img.shields.io/packagist/v/lumensistemas/lens)](https://packagist.org/packages/lumensistemas/lens)
+[![Packagist Downloads](https://img.shields.io/packagist/dt/lumensistemas/lens)](https://packagist.org/packages/lumensistemas/lens)
+
 Opinionated PHP code-quality conventions for [Lumen
 Sistemas](https://github.com/lumensistemas) products. One package
 that wraps php-cs-fixer, Rector and PHPStan with shipped configs;
