@@ -81,6 +81,7 @@ final class VendorPath
             if ($entry === '.') {
                 continue;
             }
+
             if ($entry === '..') {
                 continue;
             }

@@ -57,18 +57,31 @@ it('exits zero when the source is already clean', function (): void {
     expect($output)->toContain('lens summary');
 });
 
-it('honors --using to skip drivers entirely', function (): void {
+it('fails fast when --using contains an unknown driver name', function (): void {
     file_put_contents(
         $this->project . '/src/Demo.php',
         "<?php\nnamespace Demo;\nclass Hello{}\n",
     );
 
-    $exit = runLens(['check', '--using' => 'unknown-driver'], $output);
+    $exit = runLens(['check', '--using' => 'phpstna'], $output);
 
-    expect($exit)->toBe(0);
-    expect($output)->not->toContain('php-cs-fixer');
-    expect($output)->not->toContain('rector');
-    expect($output)->not->toContain('phpstan');
+    expect($exit)->toBeGreaterThan(0);
+    expect($output)->toContain('unknown driver(s) in --using: phpstna');
+    expect($output)->toContain('Known: php-cs-fixer, rector, phpstan');
+    expect($output)->not->toContain('lens summary');
+});
+
+it('fails fast when --using has a typo mixed with valid drivers', function (): void {
+    file_put_contents(
+        $this->project . '/src/Demo.php',
+        "<?php\n\ndeclare(strict_types=1);\n\nnamespace Demo;\n\nfinal class Demo {}\n",
+    );
+
+    $exit = runLens(['check', '--using' => 'phpstan,phpstna'], $output);
+
+    expect($exit)->toBeGreaterThan(0);
+    expect($output)->toContain('unknown driver(s) in --using: phpstna');
+    expect($output)->not->toContain('lens summary');
 });
 
 it('runs only rector when --using=rector is set', function (): void {

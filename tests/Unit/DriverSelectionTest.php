@@ -50,17 +50,29 @@ it('tolerates whitespace around comma-separated entries', function (): void {
         ->toBe(['rector', 'phpstan']);
 });
 
-it('silently drops names that do not match any driver', function (): void {
-    $selected = DriverSelection::fromUsing($this->drivers, 'phpstan,unknown,rector');
+it('throws when --using contains an unknown driver name', function (): void {
+    DriverSelection::fromUsing($this->drivers, 'phpstan,phpstna,rector');
+})->throws(
+    InvalidArgumentException::class,
+    'unknown driver(s) in --using: phpstna',
+);
 
-    expect(array_map(fn (Driver $d) => $d->name(), $selected))
-        ->toBe(['phpstan', 'rector']);
-});
+it('throws when every name in --using is unknown', function (): void {
+    DriverSelection::fromUsing($this->drivers, 'foo,bar');
+})->throws(
+    InvalidArgumentException::class,
+    'unknown driver(s) in --using: foo, bar',
+);
 
-it('returns an empty list when no name matches', function (): void {
-    $selected = DriverSelection::fromUsing($this->drivers, 'foo,bar');
+it('lists the known drivers in the error message', function (): void {
+    DriverSelection::fromUsing($this->drivers, 'phpstna');
+})->throws(
+    InvalidArgumentException::class,
+    'Known: php-cs-fixer, rector, phpstan',
+);
 
-    expect($selected)->toBe([]);
+it('treats trailing or empty comma segments as no selection', function (): void {
+    expect(DriverSelection::fromUsing($this->drivers, ',,'))->toBe($this->drivers);
 });
 
 function fakeDriver(string $name): Driver

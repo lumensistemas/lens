@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace LumenSistemas\Lens\Commands;
 
+use InvalidArgumentException;
 use LumenSistemas\Lens\Application;
 use LumenSistemas\Lens\Config\ProjectConfig;
 use LumenSistemas\Lens\Drivers\Driver;
@@ -67,7 +68,15 @@ abstract class OrchestratesDrivers extends Command
         if (! is_string($using)) {
             throw new RuntimeException('lens: --using must be a string');
         }
-        $selected = DriverSelection::fromUsing($drivers, $using);
+
+        try {
+            $selected = DriverSelection::fromUsing($drivers, $using);
+        } catch (InvalidArgumentException $e) {
+            $output->writeln('<error>' . $e->getMessage() . '</error>');
+
+            return Command::INVALID;
+        }
+
         $reporter = new Reporter($output, $ci);
 
         foreach ($selected as $driver) {
