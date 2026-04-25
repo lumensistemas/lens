@@ -14,6 +14,7 @@ parameters:
     reportUnmatchedIgnoredErrors: false
     excludePaths:
         analyseAndScan:
+            - */tests/*
             - */vendor/*
             - */storage/*
             - */bootstrap/cache/*
