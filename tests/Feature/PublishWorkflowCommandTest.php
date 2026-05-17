@@ -31,38 +31,57 @@ afterEach(function (): void {
     }
 });
 
-it('writes .github/workflows/lens.yml under the project root', function (): void {
+it('refuses to write anything without --package', function (): void {
     $application = new Application();
     $application->setAutoExit(false);
     $output = new BufferedOutput();
 
     $exit = $application->run(new ArrayInput(['command' => 'publish:workflow']), $output);
 
+    expect($exit)->toBeGreaterThan(0);
+    expect($output->fetch())->toContain('pass --package');
+    expect(is_dir($this->project . '/.github'))->toBeFalse();
+});
+
+it('writes .github/workflows/tests.yml with --package', function (): void {
+    $application = new Application();
+    $application->setAutoExit(false);
+    $output = new BufferedOutput();
+
+    $exit = $application->run(
+        new ArrayInput(['command' => 'publish:workflow', '--package' => true]),
+        $output,
+    );
+
     expect($exit)->toBe(0);
-    expect(file_exists($this->project . '/.github/workflows/lens.yml'))->toBeTrue();
-    expect(file_get_contents($this->project . '/.github/workflows/lens.yml'))
-        ->toContain('lens check --ci');
+    expect(file_exists($this->project . '/.github/workflows/tests.yml'))->toBeTrue();
+    expect(file_get_contents($this->project . '/.github/workflows/tests.yml'))
+        ->toContain('lens check --ci')
+        ->toContain('composer test:coverage');
 });
 
 it('skips an existing workflow unless --force is passed', function (): void {
     mkdir($this->project . '/.github/workflows', 0o755, true);
-    file_put_contents($this->project . '/.github/workflows/lens.yml', 'sentinel');
+    file_put_contents($this->project . '/.github/workflows/tests.yml', 'sentinel');
 
     $application = new Application();
     $application->setAutoExit(false);
     $output = new BufferedOutput();
 
-    $application->run(new ArrayInput(['command' => 'publish:workflow']), $output);
-
-    expect(file_get_contents($this->project . '/.github/workflows/lens.yml'))
-        ->toBe('sentinel');
-
     $application->run(
-        new ArrayInput(['command' => 'publish:workflow', '--force' => true]),
+        new ArrayInput(['command' => 'publish:workflow', '--package' => true]),
         $output,
     );
 
-    expect(file_get_contents($this->project . '/.github/workflows/lens.yml'))
+    expect(file_get_contents($this->project . '/.github/workflows/tests.yml'))
+        ->toBe('sentinel');
+
+    $application->run(
+        new ArrayInput(['command' => 'publish:workflow', '--package' => true, '--force' => true]),
+        $output,
+    );
+
+    expect(file_get_contents($this->project . '/.github/workflows/tests.yml'))
         ->not->toBe('sentinel');
 });
 
@@ -77,7 +96,10 @@ it('throws a clear error when .github cannot be created', function (): void {
     $output = new BufferedOutput();
 
     try {
-        $exit = $application->run(new ArrayInput(['command' => 'publish:workflow']), $output);
+        $exit = $application->run(
+            new ArrayInput(['command' => 'publish:workflow', '--package' => true]),
+            $output,
+        );
 
         expect($exit)->toBeGreaterThan(0);
         expect($output->fetch())->toContain('failed to create');

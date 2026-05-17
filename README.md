@@ -65,8 +65,8 @@ should `git fetch origin <branch>` (or use
 ## One-time setup in a new project
 
 ```sh
-vendor/bin/lens init                  # write lens.json + phpstan baseline
-vendor/bin/lens publish:workflow      # drop .github/workflows/lens.yml
+vendor/bin/lens init                          # write lens.json + phpstan baseline
+vendor/bin/lens publish:workflow --package    # drop .github/workflows/tests.yml (lint + test matrix)
 ```
 
 `init` is opt-in. lens runs without `lens.json` — it auto-detects
@@ -104,9 +104,15 @@ against lens itself — not to override locally. That is the point.
 
 ## CI
 
-`lens publish:workflow` writes a GitHub Actions workflow that
-installs PHP, caches `vendor/` and `.lens/`, and runs `lens check
---ci`. Wire it into your pull-request branch protection.
+`lens publish:workflow --package` drops a GitHub Actions workflow
+at `.github/workflows/tests.yml` that installs PHP, runs `lens
+check --ci` for lint, and runs a `composer test:coverage` matrix
+across supported PHP versions and stability profiles on Ubuntu and
+Windows. Wire it into your pull-request branch protection.
+
+`--package` is required: today this command only deploys the
+package matrix workflow. The flag declares intent and reserves
+room for other workflow shapes later.
 
 ## Convention philosophy
 
